@@ -1,3 +1,21 @@
+---
+layout:     post   				   
+title:      Objective-C 学习笔记 				
+subtitle:   day_One
+date:       2018-07-27				
+author:     Fortune					
+header-img: img/post-bg-YesOrNo.jpg 	
+catalog: true 					
+tags:								
+    - Objective-C
+---
+
+
+
+
+
+
+
 ## 类的声明与实现
 
 ### 声明（@interface）
@@ -36,6 +54,7 @@ example:
 ## 类实例的声明
 
 example:
+
 1.
 
 ```objectiivec
