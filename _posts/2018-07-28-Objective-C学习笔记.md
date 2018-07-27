@@ -36,7 +36,8 @@ example:
 ## 类实例的声明
 
 example:
-1. 
+1.
+
 ```objectiivec
 Fraction *myFraction = [Fraction alloc];
 myFraction = [myFraction init];
