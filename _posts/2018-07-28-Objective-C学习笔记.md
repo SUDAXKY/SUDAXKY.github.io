@@ -200,3 +200,22 @@ action = @selector (draw);
 //selector 暂时理解为对某个方法的封装
 ```
 
+
+
+## 异常处理
+
+```objective-c
+@try{
+    //
+}
+@catch(NSException * exception){
+    
+}
+@finally{
+    
+}
+
+////////////
+@throw//用于抛出异常
+```
+
