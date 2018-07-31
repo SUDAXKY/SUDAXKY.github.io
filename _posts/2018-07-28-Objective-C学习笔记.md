@@ -14,7 +14,7 @@ tags:
 
 
 
-
+# 2018-07-27
 
 ## 类的声明与实现
 
@@ -103,6 +103,8 @@ returnValue = [myFaction functionName: para];
 
 
 
+
+# 2018-07-29
 
 ## @class关键字
 
@@ -219,3 +221,175 @@ action = @selector (draw);
 @throw//用于抛出异常
 ```
 
+
+
+
+
+# 2018-07-31
+
+## 覆写init方法
+
+```objective-c
+-(id) init{
+    if(slef = [super init]){
+        //初始化代码
+    }
+    return self
+}
+```
+
+
+
+init 的返回类型为 id 类型， 这是编写可能会被继承的类的一般规则。
+
+
+
+## 实例变量的作用域
+
+```objective-c
+@interface Printer{
+    @private
+        int para1;
+    	int para2;
+    @protected
+        int para3;
+    @public
+        //
+    
+}
+@end
+```
+
+
+
+## 有关实例变量与属性
+
+实例变量（成员变量）在@interface的{}内声明(不推荐使用了)，属性用@property声明
+
+```objective-c
+@interface Example
+    @property Window *window
+@end
+    
+@implementation Example
+    @synthesize window = _window//可以不写也会合成存取方法和生成实例变量_window作为属性的底层存储
+```
+
+
+
+## 自定义存取方法实例
+
+```objective-c
+@interface Person : NSObject
+
+@property (nonatomic, copy) NSString* name;
+@property (nonatomic, assign) NSUInteger age;
+
+@end
+
+@implementation Person
+
+//编译器会帮我们自动生成_name和_age这两个实例变量，下面代码就可以正常使用这两个变量了
+@synthesize name = _name;
+@synthesize age = _age;
+
+- (void)setName:(NSString*)name {
+    //必须使用_name来赋值，使用self.name来设置值时编译器会自动转为调用该函数，会导致无限递归
+    //使用_name则是直接访问底层的存储属性，不会调用该方法来赋值
+    //这里使用copy是为了防止NSMutableString多态
+    _name = [name copy];
+}
+
+- (NSString*)name {
+    //必须使用_name来访问属性值，使用self.name来访问值时编译器会自动转为调用该函数，会造成无限递归
+    return _name;
+}
+
+@end
+```
+
+
+
+使用自定义的getter和setter一般是用来实现懒加载(lazy load)，在很多情况下很常用，比如:创建一个比较大的而又不一定会使用的对象，可以按照如下方法编写。
+
+
+
+```objective-c
+@property (nonatomic, strong) CustomObject *customObject;
+
+@synthesize customObject = _customObject;
+
+- (CustomObject*) customObject {
+    if (_customObject == nil) {
+        //初始化操作，会调用setter方法
+        self.customObject = [[CustomObject alloc] init];
+        //不会造成无限递归，因为这里的self.cunstomerObject = 调用的是setter方法
+        //如果按照如下方法编写不会调用setter方法，如果自定义setter方法需要完成一些事情建议使用self.customObject的方式来设置
+        //_customObject = [[CustomObject alloc] init];
+    }
+    return _customObject;
+}
+```
+
+
+
+## @property 的指示符
+
+### atomic/nonatomic
+
+指定合成存取方法是否为原子操作，可以理解为是否线程安全，但在iOS上即时使用`atomic`也不一定是线程安全的，要保证线程安全需要使用锁机制，超过本文的讲解范围，可以自行查阅。  可以发现几乎所有代码的属性设置都会使用`nonatomic`，这样能够提高访问性能，在iOS中使用锁机制的开销较大，会损耗性能。
+
+
+
+### readwrite/readonly
+
+readwrite合成getter和setter方法，readonly只合成getter方法
+
+
+
+### assign/weak/unsafe_unretained
+
+`assign`表示对属性只进行简单的赋值操作，不更改所赋的新值的引用计数，也不改变旧值的引用计数，常用于标量类型，如`NSInteger`，`NSUInteger`，`CGFloat`，`NSTimeInterval`等。  `assign`也可以修饰对象如`NSString`等类型对象，上面说过使用`assign`修饰不会更改所赋的新值的引用计数，也不改变旧值的引用计数，如果当所赋的新值引用计数为0对象被销毁时属性并不知道，编译器不会将该属性置为`nil`，指针仍旧指向之前被销毁的内存，这时访问该属性会产生野指针错误并崩溃，因此使用`assign`修饰的类型一定要为标量类型。
+
+
+
+```objective-c
+@interface Person : NSObject
+
+@property (nonatomic, assign) NSString* name;
+@property (nonatomic, assign) NSUInteger age;
+
+@end
+
+@implementation Person
+
+@synthesize name = _name;
+@synthesize age = _age;
+
+@end
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        Person *p = [[Person alloc] init];
+        //这里使用NSMutableString而不使用NSString是因为NSString会缓存字符串，后面置空的时候实际没有被销毁
+        NSMutableString *s = [[NSMutableString alloc] initWithString:@"Jiaming Chen"];
+        //设置p.name不会增加s的引用计数，只是单纯将s指向的地址赋给p.name
+        p.name = s;
+        //输出两个变量的内存地址，可以看出是一致的
+        NSLog(@"%p %p", p.name, s);
+        //这里可以正常访问name
+        NSLog(@"%@ %ld", p.name, p.age);
+        //将上述字符串置空，引用计数为0，对象被销毁
+        s = nil;
+        //查看其地址时仍然可以访问到，表示其仍然指向那一块内存
+        NSLog(@"%p", p.name);
+        //访问内容时发生野指针错误，程序崩溃。因为对象已经被销毁
+        NSLog(@"%@ %ld", p.name, p.age);
+    }
+    return 0;
+}
+```
+
+
+
+使用`unsafe_unretained`修饰时效果与`assign`相同，不会增加引用计数，当所赋的值被销毁时不会被置为`nil`可能会发生野指针错误。`unsafe_unretained`与`assign`的区别在于，`unsafe_unretained`只能修饰对象，不能修饰标量类型，而`assign`两者均可修饰。
