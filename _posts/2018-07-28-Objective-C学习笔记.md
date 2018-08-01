@@ -393,3 +393,139 @@ int main(int argc, const char * argv[]) {
 
 
 使用`unsafe_unretained`修饰时效果与`assign`相同，不会增加引用计数，当所赋的值被销毁时不会被置为`nil`可能会发生野指针错误。`unsafe_unretained`与`assign`的区别在于，`unsafe_unretained`只能修饰对象，不能修饰标量类型，而`assign`两者均可修饰。
+
+
+
+### week/strong
+
+`strong`表示属性对所赋的值持有强引用表示一种“拥有关系”(owning relationship)，会先保留新值即增加新值的引用计数，然后再释放旧值即减少旧值的引用计数。只能修饰对象。如果对一些对象需要保持强引用则使用`strong`。
+
+`weak`表示对所赋的值对象持有弱引用表示一种“非拥有关系”(nonowning relationship)，对新值不会增加引用计数，也不会减少旧值的引用计数。所赋的值在引用计数为0被销毁后，`weak`修饰的属性会被自动置为`nil`能够有效防止野指针错误。 
+
+
+
+### copy
+
+`copy`修饰的属性会在内存里拷贝一份对象，两个指针指向不同的内存地址。  一般用来修饰有对应可变类型子类的对象。  如：`NSString/NSMutableString`,`NSArray/NSMutableArray`,`NSDictionary/NSMutableDictionary`等。  为确保这些不可变对象因为可变子类对象影响，需要`copy`一份备份，如果不使用`copy`修饰，使用`strong`或`assign`等修饰则会因为多态导致属性值被修改。 
+
+
+
+使用strong修饰不可变对象：
+
+```objective-c
+@interface Person : NSObject
+
+//使用strong修饰NSString
+@property (nonatomic, strong) NSString* name;
+@property (nonatomic, assign) NSUInteger age;
+
+@end
+
+@implementation Person
+
+@synthesize name = _name;
+@synthesize age = _age;
+
+@end
+
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        Person *p = [[Person alloc] init];
+        NSMutableString *s = [[NSMutableString alloc] initWithString:@"Jiaming Chen"];
+        //将可变字符串赋值给p.name
+        p.name = s;
+        //输出的地址和内容均一致
+        NSLog(@"%p %p %@ %@", p.name, s, p.name, s);
+        //修改可变字符串s
+        [s appendString:@" is a good guy"];
+        //再次输出p.name被影响
+        NSLog(@"%p %p %@ %@", p.name, s, p.name, s);
+    }
+    return 0;
+}
+```
+
+
+
+对于可变对象类型，如`NSMutableString`、`NSMutableArray`等则不可以使用`copy`修饰，因为`Foundation`框架提供的这些类都实现了`NSCopying`协议，使用`copy`方法返回的都是不可变对象，如果使用`copy`修饰符在对可变对象赋值时则会获取一个不可变对象，接下来如果对这个对象进行可变对象的操作则会产生异常，因为`OC`没有提供`mutableCopy`修饰符，对于可变对象使用`strong`修饰符即可。
+
+
+
+```objective-c
+@interface Person : NSObject
+
+//使用copy修饰NSMutableString
+@property (nonatomic, copy) NSMutableString* name;
+@property (nonatomic, assign) NSUInteger age;
+
+@end
+
+@implementation Person
+
+@synthesize name = _name;
+@synthesize age = _age;
+
+@end
+
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        Person *p = [[Person alloc] init];
+        NSMutableString *s = [[NSMutableString alloc] initWithString:@"Jiaming Chen"];
+        //将可变字符串赋值给p.name
+        p.name = s;
+        //输出的地址不一致，内容一致
+        NSLog(@"%p %p %@ %@", p.name, s, p.name, s);
+        //修改p.name，此时抛出异常
+        [p.name appendString:@" is a good guy."];
+    }
+    return 0;
+}
+```
+
+
+
+有时候我们需要`copy`一个对象，或是`mutableCopy`一个对象，这时需要遵守`NSCopying`和`NSMutableCopying`协议，来实现`copyWithZone:`和`mutableCopyWithZone:`两个方法，而不是重写`copy`和`mutableCopy`两个方法。 
+`Foundation`框架中的很多数据类型已经帮我们实现了上述两个方法，因此我们可以使用`copy`方法和`mutableCopy`方法来复制一个对象，两者的区别在于`copy`的返回值仍未不可变对象，`mutableCopy`的返回值为可变对象。
+
+| copy       | mutableCopy                    |
+| ---------- | ------------------------------ |
+| NS*        | 浅拷贝，只拷贝指针，地址相同   |
+| NSMutable* | 单层深拷贝，拷贝内容，地址不同 |
+
+由上述表格可以看出，对于不可变类型，使用`copy`方法时是浅拷贝，只拷贝指针，因为内容是不会变化的。使用`mutableCopy`时由于返回可变对象因此需要一份拷贝，供其他对象使用。对于可变类型，不管是`copy`还是`mutableCopy`均会进行深拷贝，所指向指针不同。
+
+前文介绍`copy`修饰符的时候讲过，在修饰`NSString`这样的不可变对象的时候使用`copy`修饰，但其实当给对象赋一个`NSString`时仍旧只复制了指针而不是拷贝内容，原因同上。
+
+
+
+```objective-c
+@interface Person : NSObject
+
+//使用copy修饰
+@property (nonatomic, copy) NSString* name;
+@property (nonatomic, assign) NSUInteger age;
+
+@end
+
+@implementation Person
+
+@synthesize name = _name;
+@synthesize age = _age;
+
+@end
+
+
+int main(int argc, const char * argv[]) {
+    @autoreleasepool {
+        Person *p = [[Person alloc] init];
+        NSString *s = @"Jiaming Chen";
+        p.name = s;
+        //p.name的地址与s地址相同，不可变对象copy是浅拷贝
+        NSLog(@"%p %p %@ %@", p.name, s, p.name, s);
+    }
+    return 0;
+}
+```
+
