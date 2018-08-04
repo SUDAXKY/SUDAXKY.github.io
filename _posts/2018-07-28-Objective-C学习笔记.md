@@ -529,3 +529,115 @@ int main(int argc, const char * argv[]) {
 }
 ```
 
+
+
+# 2018-08-04
+
+## 分类
+
+用于扩展一个类，为一个类添加一组自洽的新方法
+
+example:
+
+```objective-c
+#import "Fraction.h"
+
+//没有列出父类，因为在Faction.h中已经声明，而且列出父类或者时新的实例变量编译器会报错
+@interface Fraction (MathOps)
+-(Fraction *) add: (Fraction *) f;
+-(Fraction *) mul: (Fraction *) f;
+-(Fraction *) sub: (Fraction *) f;
+-(Fraction *) div: (Fraction *) f;
+@end
+```
+
+tip：分类的接口文件一般命名为类+分类.h
+
+
+
+## 未命名分类
+
+是指在“（）”内不指定名字的分类。
+
+这种分类可以定义附加的额实例变量来扩展一个类，**这在命名分类中是不允许的**，命名分类中声明的新方法需要在
+
+**主实现区域实现**，而不是在分离的实现区域。
+
+
+
+tip：分类可以覆写该类中的另一个方法，不过并不建议这么做。不符合设计原则。
+
+
+
+## 协议
+
+协议是多个类共享的一个方法列表。//理解里类似Java的接口
+
+协议中列出的方法没有相应实现，计划由其他人实现。
+
+协议列出的一组方法，**有些可以是选择实现有些则必须实现**
+
+```objective-c
+//标准的Foudation头文件NSObject.h中定义的NSCopying协议的方式
+
+@protocol
+-(id) copyWithZone:(NSZone *)zone;
+@end
+```
+
+
+
+采用协议：
+
+```objective-c
+@interface AddressBook: NSObject <NSCopying>
+//在实现部分实现copyWithZone
+```
+
+
+
+**一个类遵守一个协议**，**那他的子类也遵守这个协议**
+
+
+
+**@optional后列出的方法为可选实现**
+
+
+
+```objective-c
+//查看一个对象是否遵守某项协议
+id currentObject;
+
+if([currentObject conformsToProtocol]: @protocal(Drawing)!=Yes){
+    //
+}
+```
+
+
+
+可以在类型名称之后添加<Drawing>来检验变量一致性
+
+id <Drawing> current Object;
+
+这告诉编译器变量指向的对象遵守Drawing协议
+
+```objective-c
+//可以扩展已有协议
+@protocol Drawing3D <Drawing>
+```
+
+
+
+一个分类也可以有自己遵守的协议。
+
+ 
+
+## 代理
+
+定义了协议的类，可以看作是将协议定义的方法代理给了实现它的类。这样类的定义可以更为通用。
+
+
+
+## 非正式协议
+
+非正式协议也称抽象协议，实际是一个分类，列出了一组没有实现的方法。//已经不用了，**@optional**取代了它
