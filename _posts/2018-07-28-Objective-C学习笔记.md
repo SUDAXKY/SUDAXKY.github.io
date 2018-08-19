@@ -531,3 +531,338 @@ int main(int argc, const char * argv[]) {
 
 
 
+
+
+# 2018-08-04
+
+## 分类
+
+用于扩展一个类，为一个类添加一组自洽的新方法
+
+example:
+
+```objective-c
+#import "Fraction.h"
+
+//没有列出父类，因为在Faction.h中已经声明，而且列出父类或者时新的实例变量编译器会报错
+@interface Fraction (MathOps)
+-(Fraction *) add: (Fraction *) f;
+-(Fraction *) mul: (Fraction *) f;
+-(Fraction *) sub: (Fraction *) f;
+-(Fraction *) div: (Fraction *) f;
+@end
+```
+
+tip：分类的接口文件一般命名为类+分类.h
+
+
+
+## 未命名分类
+
+是指在“（）”内不指定名字的分类。
+
+这种分类可以定义附加的额实例变量来扩展一个类，**这在命名分类中是不允许的**，命名分类中声明的新方法需要在
+
+**主实现区域实现**，而不是在分离的实现区域。
+
+
+
+tip：分类可以覆写该类中的另一个方法，不过并不建议这么做。不符合设计原则。
+
+
+
+## 协议
+
+协议是多个类共享的一个方法列表。//理解里类似Java的接口
+
+协议中列出的方法没有相应实现，计划由其他人实现。
+
+协议列出的一组方法，**有些可以是选择实现有些则必须实现**
+
+```objective-c
+//标准的Foudation头文件NSObject.h中定义的NSCopying协议的方式
+
+@protocol
+-(id) copyWithZone:(NSZone *)zone;
+@end
+```
+
+
+
+采用协议：
+
+```objective-c
+@interface AddressBook: NSObject <NSCopying>
+//在实现部分实现copyWithZone
+```
+
+
+
+**一个类遵守一个协议**，**那他的子类也遵守这个协议**
+
+
+
+**@optional后列出的方法为可选实现**
+
+
+
+```objective-c
+//查看一个对象是否遵守某项协议
+id currentObject;
+
+if([currentObject conformsToProtocol]: @protocal(Drawing)!=Yes){
+    //
+}
+```
+
+
+
+可以在类型名称之后添加<Drawing>来检验变量一致性
+
+id <Drawing> current Object;
+
+这告诉编译器变量指向的对象遵守Drawing协议
+
+```objective-c
+//可以扩展已有协议
+@protocol Drawing3D <Drawing>
+```
+
+
+
+一个分类也可以有自己遵守的协议。
+
+ 
+
+## 代理
+
+定义了协议的类，可以看作是将协议定义的方法代理给了实现它的类。这样类的定义可以更为通用。
+
+
+
+## 非正式协议
+
+非正式协议也称抽象协议，实际是一个分类，列出了一组没有实现的方法。//已经不用了，**@optional**取代了它
+
+
+
+# 2018-08-19
+
+## 关于框架的几个术语
+
+1. Cocoa总的来说是指Foundation框架、Application Kit框架和名为Core Data的第三方框架
+2. Cocoa Touch是指Foundation、CoreData、UIKit框架
+
+
+
+## Foundation中的数字对象NSNumber
+
+NSNumber类为每种基本数据类型提供了一组创建和初始化方法、初始化实例方法、检索实例方法
+
+以整型数据为例
+
+```objective-c
+//创建和初始化方法
+numberWithInteger:
+//初始化实例方法
+initWithinteger:
+//检索实例方法
+integerValue
+```
+
+
+
+比较NSNumber对象的大小
+
+```objective-c
+[intNumber compare: myNumber]
+//intNumber小于myNumber时返回NSOrderAscending
+//大于时返回NSOrderDescending
+//相等时返回NSOrderSame
+```
+
+tip：
+
+已经初始化的NSNumber的值不能被修改
+
+
+
+## 字符串对象NSString
+
+### 创建一个字符串常量
+
+@"Programming is funning!" 它属于NSConstantString类的字符串常量，NSConstantString是NSString 的子类。
+
+### 定义NSString对象以及NSLog函数
+
+```objective-c
+#import<Foundation/Foundation.h>
+
+int main(int argc, char *argv[]){
+    @autoreleasepool{
+        NSString *str = @"Fortune";
+        
+        NSLog(@"%@", str);//%@格式化字符串不仅仅可以显示NSString对象，而且可以显示类似NSnumber这样的对象
+    }
+    return 0;
+}
+```
+
+
+
+### description方法
+
+可以通过覆写description方法来利用%@格式化字符串来显示数组字典和集合的全部内容。
+
+该方法默认显示类名和该对象在内存中的地址。
+
+```objective-c
+//覆写Fraction的description方法实现格式化
+-(NSString *)description{
+    return [NSString stringWithzFormat: @"%i/%i", numerator, denominator];
+}
+//stringWithFormat使用方法与NSLog类似，只是其返回一个格式化了的字符串而不是写入控制台
+```
+
+
+
+### 可变对象与不可变对象
+
+NSString — 不可变字符串
+
+NSMutableString — 可变字符串
+
+```objective-c
+//处理不可变字符串的基本方法
+
+#import <Foundation/Foundation.h>
+int main(int argc, char *argv[]){
+    @autorealeasepoll{
+        NSString *str1 = @"This is String A";
+        NSString *str2 = @"This is String B";
+        
+        NSString *res;
+        NSComparisonResult compareResult;
+        
+        NSRange subRange;
+        
+        //计算字符串长度
+        NSLog(@"%lu", [str1 length]);
+        
+        //将一个字符串复制到另一个字符串
+        res = [NSString stringWithString: str1];
+        
+        //将是str2复制到str1的末尾
+        str2 = [str1 stringByAppendingStirng: str2];//创建了一个新的字符串对象
+        
+        //转换大写
+        res = [str1 uppercaseString];
+        
+        
+        res = [str1 subStringToIndex: 3];
+        
+        res = [str1 subStringFromIndex: 3];
+        
+        res = [str1 subStringWithRange: NSMakeRange (8, 6)];
+        
+        subRange = [str1 rangeOfString: @"stringA"];
+        
+        if(subRange.location == NSNotFound){
+            NSLog(@"Not Found");
+        }else{
+            NSLog(@"%lu, %lu", subRange.location, subRange.length);
+        }
+    }
+    return 0;
+}
+```
+
+将str1，str2声明为不可变字符串，是指他们指向的内对象是不可变的，但是作为引用，他们本身却是可以改变的，可以去指向其他的不可变字符串对象
+
+
+
+```objective-c
+#import <Foundation/Foundation.h>
+
+int main(int argc, char *argv[]){
+    @autoreleasepool{
+        NSString *str1 = @"This is String A";
+        NSString *search, *replace;
+        NSMutableString *mstr;
+        NSRange substr;
+        
+        //从不可变字符串创建可变字符串
+        mstr = [NSMutableString stringWithStirng: str1];
+     
+        //插入字符
+        [mstr insertString: @"mutable"atIndex: 7];
+        
+        //插入末尾进行有效拼接
+        [mstr insertStirng: @"end" atIndex: [mstr length]];
+        
+        //直接使用appendString
+        [mstr appendString: @"end2"];
+        
+        //根据范围删除字符串
+        [mstr deleteCharactersInRange: NSMakeRange (16, 13)];
+        
+        //查找然后删除
+        substr = [mstr rangeOfString: @"end"];
+        
+        if(substr == NSNotFound){
+            [mstr deleteCharactersInRange: substr];
+        }
+        
+        //直接设置为可变字符串
+        [mstr setString: @"This is StirngA"];
+        
+        //替换
+        [mstr replaceCharactersIRange: MSMakeRange(8, 8)];
+        
+        //查找和替换
+        search = @"This is";
+        repslce = @"this is";
+        
+        substr = [mstr rangeOfString: search];
+        
+        if(sunstr != NSNotFound){
+            [mstr replaceCharctersInRange: substr withString: replace];
+        }
+        //查找和替换所有匹配项
+        search = @"a";
+        replace = @"X";
+        
+        substr = [mstr rangeOfString: search];
+        
+        while(substr != NSNotFound){
+            [mstr replaceCharactersInRange: sunstr withString: replace];
+            substr = [mstr rangeOfString: search];
+        }
+        
+    }
+    return 0;
+}
+```
+
+
+
+## 数组对象
+
+创建数组
+
+```objective-c
+NSArray *array = [NSArray arrayWithObjects: @"test"];
+
+NSLog(@"%@", [array objectAtIndex: 0]);
+
+//显示整个数组的内容
+NSLog(@"%@" array);
+
+NSMutableArray *numbers = [NSMutableArray array];
+//创建可变数组对象
+for(int i = 0; i<10; i++){
+    [numbers addObject: [NSNumber numberWithInteger: i]];
+}//数组中只可以存放数字对象不可以存放基本数据类型
+
+```
+
