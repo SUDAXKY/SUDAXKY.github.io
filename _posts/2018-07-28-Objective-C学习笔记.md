@@ -866,3 +866,37 @@ for(int i = 0; i<10; i++){
 
 ```
 
+数组排序
+
+1. sortUsingSelector（需要为数组内的对象添加比较方法）
+2.  使用区块排序（可提升效率）
+
+```objective-c
+[book sortUsingComparator:
+ ^(id obj1, id obj2){
+     return [[obj1 name] compare: [obj2 name]]
+ };];
+```
+
+## NSValue对象
+
+用于包装结构
+
+具有wrapping和unwrapping的用途
+
+
+
+## 字典NSDictionary/NSMutableDictionary
+
+
+
+## 集合
+
+### NSSet
+
+### NSMutableSet
+
+### NSCountedSet（单词计数：一个集合内可以存放多个相同对象，维护一个计数）
+
+### NSIndexSet（没有可变版本）
+
