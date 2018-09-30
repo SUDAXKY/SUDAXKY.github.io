@@ -1,7 +1,7 @@
 ---
 layout:     post   				   
 title:      Objective-C 学习笔记 				
-subtitle:   都写在这里了...反正有目录
+subtitle:   先oc后swift
 date:       2018-07-27				
 author:     Fortune					
 header-img: img/post-bg-YesOrNo.jpg 	
