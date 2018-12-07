@@ -1,18 +1,18 @@
 # Site settings
-title: Fortune Blog
-SEOTitle: Fortune的博客 | Fortune Blog
+title:  Yolanda Blog
+SEOTitle: Yolanda的博客 | Yolanda Blog
 header-img: img/post-bg-swift.jpg
-email: njussj@gmail.com
+email: 1215111375@qq.com
 description: "Every failure is leading towards success."
-keyword: "Fortune, Fortune Blog, Fortune的博客, shishengjie, 石胜杰"
-url: "http://NJUSSJ.github.io"          # your host, for absolute URL
+keyword: "Yolanda, Yolanda Blog, Yolanda的博客, xukeyuan, 许可园"
+url: "http://SUDAXKY.github.io"          # your host, for absolute URL
 baseurl: ""      # for example, '/blog' if your blog hosted on 'host/blog'
-github_repo: "https://github.com/NJUSSJ/NJUSSJ.github.io.git" # you code repository
+github_repo: "https://github.com/SUDAXKY/SUDAXKY.github.io.git" # you code repository
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "Goals determine what you going to be!"
-sidebar-avatar: /img/icon.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/icon.JPG      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
@@ -20,7 +20,7 @@ sidebar-avatar: /img/icon.jpg      # use absolute URL, seeing it's used in both 
 RSS: false
 #weibo_username:     Fortune整齐的牙
 #zhihu_username:     fortune
-github_username:    NJUSSJ
+github_username:    SUDAXKY
 #facebook_username:  baiying.qiu.7
 #jianshu_username:   e71990ada2fd
 #twitter_username:   qiubaiying
@@ -64,9 +64,9 @@ gitalk:
   enable: true    #是否开启Gitalk评论
   clientID: 968c637ae37fc9cff2ec                         #生成的clientID
   clientSecret: 26e021af150df6db6d60a6251b1d0f557d940671   #生成的clientSecret
-  repo: njussj.github.io    #仓库名称
-  owner: NJUSSJ    #github用户名
-  admin: NJUSSJ
+  repo: sudaxky.github.io    #仓库名称
+  owner: SUDAXKY    #github用户名
+  admin: SUDAXKY
   distractionFreeMode: true #是否启用类似FB的阴影遮罩
 
 
